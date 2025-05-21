@@ -1,0 +1,351 @@
+Declare
+   --Sclar Variable( one values )
+   a number(10);
+   b Varchar2(100);
+   c Date ;
+   d timestamp; 
+   
+   --Cursor Variable
+   Cursor c1 is 
+   Select Employee_id, First_name, Hire_date  ,DEPARTMENT_ID
+   from Employees;
+ 
+   c2 c1%rowtype;  
+   
+   Cursor c3 is 
+   select department_id , department_name 
+   from departments;
+    
+   c4 c3%rowtype; 
+
+begin 
+   a:=9600820766;
+   b:='Muthulingam';
+   c:=Sysdate;
+   d:=systimestamp;
+
+   --Implicit Cursor 
+   Select Employee_id, First_name, Hire_date, Hire_date into a,b,c,d
+   from Employees
+   where Employee_id=100;
+   --ORA-01858: a non-numeric character was found where a numeric was expected
+   
+   --How to handle the cursor in executable section
+   --Explict cursor 
+   open c1;  
+     loop  
+   fetch c1 into c2; 
+   exit when c1%notfound; 
+   
+                                   open c3;  
+                                     loop
+                                     fetch c3 into c4; --1 row 26 row
+                                       exit when c3%notfound;
+                                       
+                                       if c2.department_id=c4.department_id then 
+                                   
+                                                       --PLS-00302: component 'DEPARTMENT_ID' must be declared
+                                                       if mod(c2.Employee_id,2)=0 and c2.department_id=10 then 
+                                                       Dbms_output.put_line('Mobile No : ' ||c2.Employee_id);
+                                                       Dbms_output.put_line('Name : ' ||c2.First_name);
+                                                       Dbms_output.put_line('Date_is : ' ||c2.Hire_date);
+                                                       Dbms_output.put_line('Departmnet id  : ' ||c2.department_id);
+                                                       Dbms_output.put_line('Department_name  : ' ||c4.department_Name);
+                                                       end if;
+                                    end if;
+                                
+                                    Null;
+                                   end loop; --record end
+                                   close c3;
+   End loop;
+  close c1;
+
+   
+   --Explict cursor 
+   For i in c1 loop --employee loop
+      for j in c3 loop --department loop
+      
+      if i.department_id =j.department_id then 
+      
+   --Control Structure 
+                if mod(i.Employee_id,2)=0 and i.department_id=10 then 
+--                       Dbms_output.put_line('Emp id : ' ||i.Employee_id);
+--                       Dbms_output.put_line('Name : ' ||i.First_name);
+--                       Dbms_output.put_line('Hire date : ' ||i.Hire_date);
+--                       Dbms_output.put_line('Departmnet id  : ' ||i.department_id);
+--                       Dbms_output.put_line('Department_name  : ' ||j.department_Name);
+                        Null;
+                end if ;
+      end if ;
+   end loop;  
+   End loop;
+End;
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+program 1
+-- Single line comment
+-- Anonyms Block
+declare
+a number(10);
+b varchar2(100);
+c date;
+
+begin
+-- Assignment Operator ( := )
+a := 22;
+b := 'Sampath';
+c := '13-04-2025';
+
+-- Oracle's predefined package ( dbms output )
+-- ( put_line ) - procedure / function
+dbms_output.put_line('Emp. No : ' || a);
+dbms_output.put_line('Emp. Name : ' || b);
+dbms_output.put_line('Emp. join_date : ' || c);
+
+end;
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+program 2 
+-- select employee_id, first_name, Hire_date from employees;
+-- ORA-01422: exact fetch returns more than requested number of rows
+
+declare
+a number(5);
+b varchar2(20);
+c date;
+
+begin
+
+select employee_id, first_name, Hire_date into a, b, c 
+from employees
+where employee_id = 102;
+-- implicit cursor
+-- we use into clause to move data to temprory area
+
+-- Limitation 
+-- more than 1 record not fetched
+
+dbms_output.put_line(a || b || c);
+
+end;
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+program 3 - v1
+-- select employee_id, first_name, Hire_date from employees;
+declare
+cursor c1 is  -- c1 is cursor, Explicit cursor 
+select employee_id, first_name, Hire_date from employees;
+BEGIN
+for i in c1
+loop
+dbms_output.put_line(i.employee_id || i.first_name || i.hire_date);
+end loop;
+end;
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+program 3 - v2
+-- select employee_id, first_name, Hire_date from employees;
+declare
+cursor c1 is -- cursor c1 is Explicit cursor
+select employee_id, first_name, Hire_date from employees;
+c2 c1%rowtype; 
+begin
+open c1;
+loop
+fetch c1 into c2;
+exit when c1%notfound; -- cursor attributes - not found
+dbms_output.put_line(c2.employee_id || c2.first_name || c2.hire_date);
+end loop;
+close c1;
+end;
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+program 4 - if condition
+-- select employee_id, first_name, Hire_date from employees;
+declare
+cursor c1 is  -- c1 is cursor, Explicit cursor 
+select employee_id, first_name, Hire_date, department_id from employees;
+-- c2 c1%rowtype;
+BEGIN
+for i in c1
+loop
+if i.department_id = 10 then  -- control structure
+dbms_output.put_line(i.employee_id || i.first_name || i.hire_date);
+end if;
+end loop;
+end;
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+program 5 using control structure
+-- select employee_id, first_name, Hire_date from employees;
+declare
+cursor c1 is  -- c1 is cursor, Explicit cursor 
+select employee_id, first_name, Hire_date, department_id from employees;
+BEGIN
+for i in c1
+loop
+dbms_output.put_line(i.employee_id || i.first_name || i.hire_date);
+if i.department_id = 10 then  -- control structure
+dbms_output.put_line(i.employee_id || i.first_name || i.hire_date);
+end if;
+end loop;
+end;
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+program 6 - multiple cursors in a single program 
+-- select employee_id, first_name, Hire_date from employees;
+declare
+cursor c1 is  -- c1 is cursor, Explicit cursor 
+select employee_id, first_name, Hire_date, department_id from employees;
+cursor c2 is 
+select department_id, department_name from departments;
+BEGIN
+for i in c1
+loop
+for j in c2
+loop
+if i.department_id = j.department_id then
+dbms_output.put_line(i.employee_id || i.first_name || i.hire_date || j.department_name);
+end if;
+end loop;
+end loop;
+end;
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+program 7 - parameterized cursor
+-- select employee_id, first_name, Hire_date from employees;
+declare
+cursor c1 is  -- c1 is cursor, Explicit cursor 
+select employee_id, first_name, Hire_date, department_id from employees;
+cursor c2(dept_id number) is -- c2(dept_id number) parameterized cursor  
+select department_id, department_name from departments where department_id = dept_id;
+BEGIN
+for i in c1
+loop
+for j in c2(i.department_id)
+loop
+--if i.department_id = j.department_id then
+dbms_output.put_line(i.employee_id || i.first_name || i.hire_date || j.department_name);
+--end if;
+end loop;
+end loop;
+end;
+
+    above all programs are anonyms block
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+program 8 - 
+
+
+ /* select distinct department_id,
+                 job_id,
+        ( select department_name from departments d where d.department_id=e.department_id) dept_namne,
+       (select count(1) from employees ) COUNT_OF_EMPLOYEES,
+       sum(salary) over ( partition by department_id order by 1 asc ) sum_of_salary_dept_wise,
+       avg(salary) over ( partition by job_id order by 1 desc ) avg_salary_job_code_wise
+from employees e; */
+ /*
+Department id , --cursor  
+department name, --cursor 
+cout of employees(total employee count), --implicit cursor 
+sum of salary ( dept wise), i.department_id
+avg of salary ( Job code wise)*/
+
+--Anonyms block 
+
+--Anonyms block 
+Declare 
+   Cursor c1 is 
+      select * from departments d
+      where exists ( select 1 from employees e where e.department_id =d.department_id);
+      --and department_id=110;
+      
+    Cursor c2(dept_id number) is 
+       select distinct job_id
+       from employees where department_id =dept_id ;
+    
+    
+    count_of_employees Number;
+    Sum_of_salary_dept_wise number;
+    avg_of_salary_job_wise number;
+Begin
+Execute immediate 'Truncate table Dept_Job_Wise_Sal_Information'; --Dynamic SQL
+   for i in c1  loop  
+        --implicit cursor 
+         select count(1) 
+                   into count_of_employees 
+         from employees ;
+         
+         select sum(salary) 
+                   into Sum_of_salary_dept_wise 
+         from employees   where department_id =i.department_id;
+         
+         
+         for j in c2(i.department_id) loop
+         select avg(salary) into avg_of_salary_job_wise from employees   where job_id =j.job_id;
+         --dbms_output.put_line(i.department_id || i.department_name || count_of_employees ||'-'|| Sum_of_salary_dept_wise || '-'||avg_of_salary_job_wise);
+         insert into Dept_Job_Wise_Sal_Information values (i.department_id, i.department_name, count_of_employees, Sum_of_salary_dept_wise,avg_of_salary_job_wise);
+         end loop;
+end loop;
+commit;
+end;
+
+/
+--table 
+--use
+
+create table Dept_Job_Wise_Sal_Information ( dept_id number, Dept_name varchar2(100), tot_emp_count number, Sum_of_sal_Dept_wise number, avg_Salary_job_wise number);
+select * from Dept_Job_Wise_Sal_Information;
+
+
+Create or replace Procedure  Emp_Cum_Information_Prc
+as 
+   Cursor c1 is 
+      select * from departments d
+      where exists ( select 1 from employees e where e.department_id =d.department_id);
+      --and department_id=110;
+      
+    Cursor c2(dept_id number) is 
+       select distinct job_id
+       from employees where department_id =dept_id ;
+    
+    
+    count_of_employees Number;
+    Sum_of_salary_dept_wise number;
+    avg_of_salary_job_wise number;
+Begin
+Execute immediate 'Truncate table Dept_Job_Wise_Sal_Information'; --Dynamic SQL DDL (Create, alter, Trucate, Drop)
+   for i in c1  loop  
+        --implicit cursor 
+         select count(1) 
+                   into count_of_employees 
+         from employees ;
+         
+         select sum(salary) 
+                   into Sum_of_salary_dept_wise 
+         from employees   where department_id =i.department_id;
+         
+         
+         for j in c2(i.department_id) loop
+         select avg(salary) into avg_of_salary_job_wise from employees   where job_id =j.job_id;
+         --dbms_output.put_line(i.department_id || i.department_name || count_of_employees ||'-'|| Sum_of_salary_dept_wise || '-'||avg_of_salary_job_wise);
+         insert into Dept_Job_Wise_Sal_Information values (i.department_id, i.department_name, count_of_employees, Sum_of_salary_dept_wise,avg_of_salary_job_wise);
+         end loop;
+end loop;
+commit;
+end;
+
+
+begin
+  Emp_Cum_Information_Prc();
+end;
+
+
+
+select * from employees;
+
+
+insert into employees values (207,'Muthu','Lingam','Muthulingam','123.456.789',sysdate,'AD_ASST',2000,Null,205,110);
+commit;
+
+
+select * from Dept_Job_Wise_Sal_Information;
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
